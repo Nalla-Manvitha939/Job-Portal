@@ -8,6 +8,8 @@ import { useLocation } from "wouter";
 import { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Login() {
   const [, navigate] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
@@ -58,7 +60,7 @@ export default function Login() {
 
     
     try {
-      const response = await fetch("http://localhost:8000/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +107,7 @@ export default function Login() {
 
   const handleGoogleLogin = async (credential: string) => {
     try {
-      const response = await fetch("http://localhost:8000/auth/google", {
+      const response = await fetch(`${API_URL}/auth/google`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
