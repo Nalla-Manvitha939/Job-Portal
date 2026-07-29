@@ -7,6 +7,8 @@ colorama==0.4.6
 ecdsa==0.19.2
 fastapi==0.139.0
 greenlet==3.5.3
+google-auth
+google-auth-oauthlib
 h11==0.16.0
 idna==3.18
 passlib==1.7.4
