@@ -7,6 +7,8 @@ import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Register() {
   const [, navigate] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
@@ -49,8 +51,7 @@ export default function Register() {
     }
 
     try {
-      
-      const response = await fetch("http://127.0.0.1:8000/auth/register", {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -76,7 +77,7 @@ export default function Register() {
       navigate("/login");
     } catch (error) {
       console.error("Register Error:", error);
-      alert("Backend server connection failed. Please check if server is running.");
+      alert("Backend server connection failed.");
     }
   };
 
