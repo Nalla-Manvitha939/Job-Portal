@@ -20,7 +20,6 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    
     if (
       email.trim().toLowerCase() === "recruiter@jobportal.com" &&
       password === "recruiter@123"
@@ -39,7 +38,6 @@ export default function Login() {
       return;
     }
 
-    
     if (
       email.trim().toLowerCase() === "admin@jobportal.com" &&
       password === "admin@123"
@@ -58,7 +56,6 @@ export default function Login() {
       return;
     }
 
-    
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
@@ -78,9 +75,11 @@ export default function Login() {
         return;
       }
 
-      
       const user = data.user || data;
-      localStorage.setItem("Currentuser", JSON.stringify(user));
+      console.log("Login Response:", data);
+      console.log("User:", user);
+      
+      localStorage.setItem("currentUser", JSON.stringify(user));
       if (data.access_token) {
         localStorage.setItem("token", data.access_token);
       }
@@ -125,8 +124,10 @@ export default function Login() {
       }
 
       const user = data.user;
+      console.log("Login Response:", data);
+      console.log("User:", user);
 
-      localStorage.setItem("Currentuser", JSON.stringify(user));
+      localStorage.setItem("currentUser", JSON.stringify(user));
       localStorage.setItem("token", data.access_token);
 
       switch (user.role) {
@@ -149,7 +150,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      
       <div className="border-b border-border">
         <div className="container py-4">
           <button
@@ -162,7 +162,6 @@ export default function Login() {
         </div>
       </div>
 
-      
       <div className="flex-1 flex items-center justify-center py-12">
         <div className="w-full max-w-md px-4">
           <Card className="glass-card p-8 space-y-6">
