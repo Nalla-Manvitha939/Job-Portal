@@ -80,7 +80,7 @@ export default function Login() {
 
       
       const user = data.user || data;
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("Currentuser", JSON.stringify(user));
       if (data.access_token) {
         localStorage.setItem("token", data.access_token);
       }
@@ -126,7 +126,7 @@ export default function Login() {
 
       const user = data.user;
 
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("Currentuser", JSON.stringify(user));
       localStorage.setItem("token", data.access_token);
 
       switch (user.role) {
