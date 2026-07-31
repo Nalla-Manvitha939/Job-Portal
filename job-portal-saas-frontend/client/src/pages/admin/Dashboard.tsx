@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Users, Briefcase, Building, TrendingUp, AlertCircle, FileText } from "lucide-react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function AdminDashboard() {
   const [, navigate] = useLocation();
+  const { logout } = useAuth();
 
   const [users, setUsers] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
@@ -75,13 +77,22 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      
       <div className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur">
-        <div className="container py-4">
+        <div className="container py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             <p className="text-sm text-muted-foreground">Platform overview and management</p>
           </div>
+
+          <Button
+            variant="destructive"
+            onClick={() => {
+              logout();
+              navigate("/login");
+            }}
+          >
+            Logout
+          </Button>
         </div>
       </div>
 
@@ -101,9 +112,7 @@ export default function AdminDashboard() {
           })}
         </div>
 
-        
         <div className="grid md:grid-cols-2 gap-6">
-          
           <Card className="glass-card p-6">
             <h3 className="font-bold mb-4">User Registration Growth</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -147,7 +156,6 @@ export default function AdminDashboard() {
                     className="flex items-start justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-colors border border-border/40"
                   >
                     <div className="flex-1">
-                      
                       <p className="font-medium text-sm">
                         {user.fullName || user.name || user.username || user.email}
                       </p>
@@ -169,7 +177,6 @@ export default function AdminDashboard() {
             </div>
           </Card>
 
-          
           <Card className="glass-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold flex items-center gap-2">
@@ -208,7 +215,6 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        
         <Card className="glass-card p-6">
           <h3 className="font-bold mb-4">Management</h3>
           <div className="grid md:grid-cols-4 gap-4">
