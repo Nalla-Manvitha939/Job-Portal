@@ -61,7 +61,7 @@ const CATEGORIES = [
 
 export default function Home() {
   const [, navigate] = useLocation();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const handleBrowseJobs = () => {
     if (isAuthenticated) {
@@ -85,10 +85,34 @@ export default function Home() {
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
-                <Button variant="ghost" onClick={() => navigate("/user/dashboard")}>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    if (user?.role === "admin") {
+                      navigate("/admin/dashboard");
+                    } else if (user?.role === "recruiter") {
+                      navigate("/recruiter/dashboard");
+                    } else {
+                      navigate("/user/dashboard");
+                    }
+                  }}
+                >
                   Dashboard
                 </Button>
-                <Button variant="outline">Profile</Button>
+
+                <Button variant="outline">
+                  Profile
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    logout();
+                    window.location.href = "/";
+                  }}
+                >
+                  Logout
+                </Button>
               </>
             ) : (
               <>
