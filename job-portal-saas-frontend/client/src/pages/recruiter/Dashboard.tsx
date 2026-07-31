@@ -22,11 +22,12 @@ import {
   Plus,
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function RecruiterDashboard() {
   const [, navigate] = useLocation();
+  const { logout } = useAuth();
 
-  
   const [jobs, setJobs] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
 
@@ -89,7 +90,6 @@ export default function RecruiterDashboard() {
     ];
   }, [jobs, applications]);
 
-  
   const hiringTrend = useMemo(() => {
     const months = [
       "Jan",
@@ -116,7 +116,6 @@ export default function RecruiterDashboard() {
     }));
   }, [applications]);
 
-  
   const applicantStatus = useMemo(() => {
     return [
       {
@@ -144,7 +143,6 @@ export default function RecruiterDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      
       <div className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur">
         <div className="container py-4 flex items-center justify-between">
           <div>
@@ -153,19 +151,30 @@ export default function RecruiterDashboard() {
               Manage your job postings and applicants
             </p>
           </div>
-          <Button
-            className="btn-premium"
-            onClick={() => navigate("/recruiter/post-job")}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Post New Job
-          </Button>
+
+          <div className="flex items-center gap-3">
+            <Button
+              className="btn-premium"
+              onClick={() => navigate("/recruiter/post-job")}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Post New Job
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={() => {
+                logout();
+                window.location.href = "/";
+              }}
+            >
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
 
-      
       <div className="container py-8 space-y-8">
-        
         <div className="grid md:grid-cols-4 gap-6">
           {dashboardCards.map((card, i) => {
             const Icon = card.icon;
@@ -183,9 +192,7 @@ export default function RecruiterDashboard() {
           })}
         </div>
 
-        
         <div className="grid md:grid-cols-2 gap-6">
-          
           <Card className="glass-card p-6">
             <h3 className="font-bold mb-4">Hiring Trend</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -204,7 +211,6 @@ export default function RecruiterDashboard() {
             </ResponsiveContainer>
           </Card>
 
-          
           <Card className="glass-card p-6">
             <h3 className="font-bold mb-4">Applicant Status</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -228,9 +234,7 @@ export default function RecruiterDashboard() {
           </Card>
         </div>
 
-        
         <div className="grid md:grid-cols-2 gap-6">
-          
           <Card className="glass-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold">Recent Job Postings</h3>
@@ -281,7 +285,6 @@ export default function RecruiterDashboard() {
             </div>
           </Card>
 
-          
           <Card className="glass-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold">Recent Applicants</h3>
@@ -338,7 +341,6 @@ export default function RecruiterDashboard() {
           </Card>
         </div>
 
-        
         <Card className="glass-card p-6">
           <h3 className="font-bold mb-4">Quick Actions</h3>
           <div className="grid md:grid-cols-3 gap-4">
