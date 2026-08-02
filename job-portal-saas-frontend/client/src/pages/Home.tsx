@@ -73,7 +73,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      
+      {/* Navigation */}
       <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
@@ -82,6 +82,16 @@ export default function Home() {
             </div>
             <span className="font-bold text-lg">JobPortal</span>
           </div>
+
+          <div className="hidden md:flex items-center gap-6">
+            <a href="#home" className="font-medium hover:text-blue-600 hover:underline transition-all">Home</a>
+            <a href="#about" className="font-medium hover:text-blue-600 hover:underline transition-all">About</a>
+            <a href="#features" className="font-medium hover:text-blue-600 hover:underline transition-all">Features</a>
+            <a href="#jobs" className="font-medium hover:text-blue-600 hover:underline transition-all">Jobs</a>
+            <a href="#companies" className="font-medium hover:text-blue-600 hover:underline transition-all">Companies</a>
+            <a href="#contact" className="font-medium hover:text-blue-600 hover:underline transition-all">Contact</a>
+          </div>
+
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
@@ -128,8 +138,11 @@ export default function Home() {
         </div>
       </nav>
 
-      
-      <section className="container py-20 md:py-32">
+      {/* Hero Section */}
+      <section
+        id="home"
+        className="container py-20 md:py-32 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-3xl my-6"
+      >
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <div className="space-y-4">
@@ -141,7 +154,7 @@ export default function Home() {
               </p>
             </div>
 
-            
+            {/* Search Bar */}
             <div className="flex gap-2 pt-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
@@ -150,12 +163,12 @@ export default function Home() {
                   className="pl-10"
                 />
               </div>
-              <Button size="lg" className="btn-premium">
+              <Button size="lg" className="btn-premium px-8">
                 Search
               </Button>
             </div>
 
-            
+            {/* Popular Keywords */}
             <div className="flex flex-wrap gap-2 pt-4">
               <span className="text-sm text-muted-foreground">Popular:</span>
               {["React Developer", "Product Manager", "UI Designer"].map((keyword) => (
@@ -165,29 +178,48 @@ export default function Home() {
               ))}
             </div>
 
-            
+            {/* CTA Buttons */}
             <div className="flex gap-4 pt-6">
-              <Button size="lg" className="btn-premium" onClick={handleBrowseJobs}>
+              <Button 
+                size="lg"
+                variant="outline"
+                className="bg-blue-600 text-white hover:text-white hover:border-blue-600 transition-all duration-300"
+                onClick={handleBrowseJobs}
+              >
                 Browse Jobs <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button size="lg" variant="outline">
+              <Button 
+                size="lg"
+                variant="outline"
+                className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
+              >
                 Post a Job
               </Button>
             </div>
           </div>
 
-          
-          <div className="glass-card p-8 h-96 flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <div className="text-6xl">📊</div>
-              <p className="text-sm text-muted-foreground">Premium Dashboard Preview</p>
-            </div>
+          {/* Hero Statistics Preview Cards */}
+          <div className="glass-card p-6 min-h-[420px] flex flex-col justify-center gap-4">
+            <Card className="p-4 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <h3 className="font-bold text-lg">Jobs Available</h3>
+              <p className="text-2xl font-bold text-blue-600">12,500+</p>
+            </Card>
+
+            <Card className="p-4 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <h3 className="font-bold text-lg">Companies</h3>
+              <p className="text-2xl font-bold text-green-600">850+</p>
+            </Card>
+
+            <Card className="p-4 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <h3 className="font-bold text-lg">Candidates</h3>
+              <p className="text-2xl font-bold text-purple-600">25,000+</p>
+            </Card>
           </div>
         </div>
       </section>
 
-      
-      <section className="container py-16">
+      {/* Featured Jobs Section */}
+      <section id="jobs" className="container py-16">
         <div className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl md:text-4xl font-bold">Featured Jobs</h2>
@@ -196,7 +228,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {FEATURED_JOBS.map((job) => (
-              <Card key={job.id} className="glass-card p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+              <Card key={job.id} className="glass-card p-6 hover:shadow-2xl hover:-translate-y-2 hover:border-blue-500 transition-all duration-300 cursor-pointer group">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center font-bold text-accent">
                     {job.logo}
@@ -242,8 +274,8 @@ export default function Home() {
         </div>
       </section>
 
-      
-      <section className="container py-16">
+      {/* Top Companies Section */}
+      <section id="companies" className="container py-16">
         <div className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl md:text-4xl font-bold">Top Companies</h2>
@@ -252,7 +284,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-4 gap-6">
             {TOP_COMPANIES.map((company) => (
-              <Card key={company.id} className="glass-card p-6 hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <Card key={company.id} className="glass-card p-6 hover:shadow-2xl hover:-translate-y-2 hover:border-blue-500 transition-all duration-300 cursor-pointer">
                 <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center font-bold text-accent mb-4">
                   {company.logo}
                 </div>
@@ -280,8 +312,8 @@ export default function Home() {
         </div>
       </section>
 
-      
-      <section className="container py-16">
+      {/* Categories Section */}
+      <section id="about" className="container py-16">
         <div className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl md:text-4xl font-bold">Browse by Category</h2>
@@ -290,7 +322,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-4">
             {CATEGORIES.map((category) => (
-              <Card key={category.name} className="glass-card p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+              <Card key={category.name} className="glass-card p-6 hover:shadow-2xl hover:-translate-y-2 hover:border-blue-500 transition-all duration-300 cursor-pointer group">
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
                     <div className="text-3xl">{category.icon}</div>
@@ -305,7 +337,7 @@ export default function Home() {
         </div>
       </section>
 
-      
+      {/* Statistics Section */}
       <section className="container py-16">
         <div className="grid md:grid-cols-4 gap-6">
           {[
@@ -326,8 +358,8 @@ export default function Home() {
         </div>
       </section>
 
-      
-      <section className="container py-16">
+      {/* How It Works Section */}
+      <section id="features" className="container py-16">
         <div className="space-y-8">
           <div className="space-y-2 text-center">
             <h2 className="text-3xl md:text-4xl font-bold">How It Works</h2>
@@ -355,7 +387,7 @@ export default function Home() {
         </div>
       </section>
 
-      
+      {/* CTA Section */}
       <section className="container py-16">
         <Card className="glass-card p-12 text-center space-y-6 bg-gradient-to-r from-accent/10 to-accent/5">
           <h2 className="text-3xl md:text-4xl font-bold">Ready to Find Your Dream Job?</h2>
@@ -373,8 +405,8 @@ export default function Home() {
         </Card>
       </section>
 
-      
-      <footer className="border-t border-border mt-20 py-12 bg-card/50">
+      {/* Footer */}
+      <footer id="contact" className="border-t border-border mt-20 py-12 bg-card/50">
         <div className="container">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="space-y-4">
@@ -418,7 +450,7 @@ export default function Home() {
           </div>
 
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 JobPortal. All rights reserved.</p>
+            <p>&copy; 2026 JobPortal. All rights reserved.</p>
           </div>
         </div>
       </footer>
