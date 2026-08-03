@@ -110,7 +110,10 @@ export default function Home() {
                   Dashboard
                 </Button>
 
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/user/profile")}
+                >
                   Profile
                 </Button>
 
