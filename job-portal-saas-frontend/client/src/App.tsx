@@ -20,6 +20,7 @@ import JobDetails from "./pages/user/JobDetails";
 import ApplyJob from "./pages/user/ApplyJob";
 import MyApplications from "./pages/user/MyApplications";
 import UserProfile from "./pages/user/Profile";
+import SavedJobs from "./pages/user/SavedJobs"; // <-- Added SavedJobs import
 
 
 import RecruiterDashboard from "./pages/recruiter/Dashboard";
@@ -82,6 +83,12 @@ function Router() {
       <Route path="/user/profile">
         <ProtectedRoute allowedRoles={["user"]}>
           <UserProfile />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/user/saved-jobs">
+        <ProtectedRoute allowedRoles={["user"]}>
+          <SavedJobs />
         </ProtectedRoute>
       </Route>
 
