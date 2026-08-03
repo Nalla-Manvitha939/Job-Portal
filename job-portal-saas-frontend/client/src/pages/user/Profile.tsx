@@ -69,14 +69,16 @@ export default function Profile() {
       setProfileData(existingProfile);
       setProfileImage(existingProfile.profileImage || "");
     } else {
+      const name = (currentUser.fullName || "").trim().split(" ");
+
       setProfileData({
         userId: currentUser.id,
 
-        firstName: currentUser.firstName || "",
-        lastName: currentUser.lastName || "",
+        firstName: name[0] || "",
+        lastName: name.slice(1).join(" ") || "",
 
         email: currentUser.email || "",
-        phone: currentUser.phone || "",
+        phone: currentUser.mobile || "",
         location: "",
 
         headline: "",
@@ -88,7 +90,7 @@ export default function Profile() {
 
         education: [],
         resumeName: "",
-        profileImage: "", 
+        profileImage: "",
       });
     }
   }, []);
