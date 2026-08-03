@@ -1,319 +1,230 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Briefcase, BookmarkCheck, Calendar, CheckCircle, ArrowRight, TrendingUp } from "lucide-react";
-import { useLocation } from "wouter";
-import { useEffect, useState, useMemo } from "react";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, Share2, Bookmark, BookmarkCheck } from "lucide-react";
+import { useLocation, useRoute } from "wouter";
+import { useEffect, useState } from "react";
 
-export default function UserDashboard() {
+interface Job {
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  experience: string;
+  employmentType: string;
+  category: string;
+  deadline: string;
+  description: string;
+  skills: string[];
+  recruiterId: number;
+  recruiterName: string;
+  recruiterEmail: string;
+  status: string;
+  applicants: number;
+  createdAt: string;
+}
+
+const RELATED_JOBS = [
+  { id: 2, title: "Full Stack Developer", company: "TechCorp", salary: "$110k-$150k" },
+  { id: 3, title: "Frontend Engineer", company: "StartupXYZ", salary: "$100k-$140k" },
+  { id: 4, title: "React Developer", company: "DesignStudio", salary: "$90k-$130k" },
+];
+
+export default function JobDetails() {
   const [, navigate] = useLocation();
 
-  
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [applications, setApplications] = useState<any[]>([]);
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [savedJobs, setSavedJobs] = useState<any[]>([]);
-  
-  
-  const [profile, setProfile] = useState<any>(null);
+const [, params] = useRoute("/user/job/:id");
+
+const [saved, setSaved] = useState(false);
+
+const [job, setJob] = useState<Job | null>(null);
+useEffect(() => {
+  const jobs = JSON.parse(
+    localStorage.getItem("jobs") || "[]"
+  );
+
+  const selectedJob = jobs.find(
+    (j: Job) => j.id === Number(params?.id)
+  );
+
+  if (selectedJob) {
+    setJob(selectedJob);
+  }
+}, [params]);
+if (!job) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
+
 
   
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("currentUser") || "null");
-    const rawApps = JSON.parse(localStorage.getItem("applications") || "[]");
-    const rawJobs = JSON.parse(localStorage.getItem("jobs") || "[]");
-    const rawSaved = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-
-    setCurrentUser(user);
-    setApplications(rawApps);
-    setJobs(rawJobs);
-    setSavedJobs(rawSaved);
-
-    const profiles = JSON.parse(localStorage.getItem("profiles") || "[]");
-    const myProfile = profiles.find(
-      (p: any) => String(p.userId) === String(user?.id)
-    );
-    setProfile(myProfile || null);
-  }, []);
-
-  const myApplications = useMemo(() => {
-    if (!currentUser) return [];
-    return applications.filter(
-      (app: any) => String(app.applicantId) === String(currentUser.id)
-    );
-  }, [applications, currentUser]);
-
-  const userSavedJobsCount = useMemo(() => {
-    if (!currentUser) return 0;
-    return savedJobs.filter(
-      (item: any) => String(item.userId) === String(currentUser.id)
-    ).length;
-  }, [savedJobs, currentUser]);
-
-  const profileCompletion = useMemo(() => {
-    if (!profile) return 0;
-
-    let completed = 0;
-    const total = 11;
-
-    if (profile.firstName) completed++;
-    if (profile.lastName) completed++;
-    if (profile.email) completed++;
-    if (profile.phone) completed++;
-    if (profile.location) completed++;
-    if (profile.headline) completed++;
-    if (profile.bio) completed++;
-    if (profile.skills?.length) completed++;
-    if (profile.experience?.length) completed++;
-    if (profile.education?.length) completed++;
-    if (profile.resumeName) completed++;
-
-    return Math.round((completed / total) * 100);
-  }, [profile]);
-
-  const statusData = useMemo(() => {
-    return [
-      {
-        name: "Pending",
-        value: myApplications.filter((a: any) => a.status === "Pending").length,
-        color: "#3b82f6",
-      },
-      {
-        name: "Reviewed",
-        value: myApplications.filter((a: any) => a.status === "Reviewed").length,
-        color: "#8b5cf6",
-      },
-      {
-        name: "Shortlisted",
-        value: myApplications.filter((a: any) => a.status === "Shortlisted").length,
-        color: "#10b981",
-      },
-      {
-        name: "Rejected",
-        value: myApplications.filter((a: any) => a.status === "Rejected").length,
-        color: "#ef4444",
-      },
-      {
-        name: "Hired",
-        value: myApplications.filter((a: any) => a.status === "Hired").length,
-        color: "#f59e0b",
-      },
-    ];
-  }, [myApplications]);
-
-  
-  const applicationsPerMonth = useMemo(() => {
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const monthMap: Record<string, number> = {};
-
-    myApplications.forEach((app: any) => {
-      if (app.appliedAt) {
-        const month = months[new Date(app.appliedAt).getMonth()];
-        monthMap[month] = (monthMap[month] || 0) + 1;
-      }
-    });
-
-    return months.map((m) => ({
-      month: m,
-      applications: monthMap[m] || 0,
-    }));
-  }, [myApplications]);
-
-  
-  const recentApplications = useMemo(() => {
-    return [...myApplications]
-      .sort((a: any, b: any) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())
-      .slice(0, 5);
-  }, [myApplications]);
-
-  const recommendedJobs = useMemo(() => {
-    return jobs
-      .filter((j: any) => j.status === "Active")
-      .slice(0, 5);
-  }, [jobs]);
-
-  const DASHBOARD_CARDS = useMemo(() => {
-    const shortlistedCount = myApplications.filter((a: any) => a.status === "Shortlisted").length;
-    return [
-      {
-        title: "Total Applications",
-        value: myApplications.length,
-        icon: Briefcase,
-        color: "text-blue-600",
-      },
-      {
-        title: "Saved Jobs",
-        value: userSavedJobsCount, 
-        icon: BookmarkCheck,
-        color: "text-purple-600",
-      },
-      {
-        title: "Interview Calls",
-        value: shortlistedCount,
-        icon: Calendar,
-        color: "text-green-600",
-      },
-      {
-        title: "Profile Completion",
-        value: `${profileCompletion}%`,
-        icon: CheckCircle,
-        color: "text-orange-600",
-      },
-    ];
-  }, [myApplications, userSavedJobsCount, profileCompletion]);
 
   return (
     <div className="min-h-screen bg-background">
       
       <div className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur">
-        <div className="container py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Welcome back! Here's your job search summary</p>
-          </div>
-          <Button onClick={() => navigate("/user/browse-jobs")}>
-            Browse Jobs <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
+        <div className="container py-4">
+          <button
+            onClick={() => navigate("/user/browse-jobs")}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Browse Jobs
+          </button>
         </div>
       </div>
 
       
-      <div className="container py-8 space-y-8">
-        
-        <div className="grid md:grid-cols-4 gap-6">
-          {DASHBOARD_CARDS.map((card, i) => {
-            const Icon = card.icon;
-            return (
-              <Card key={i} className="glass-card p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <Icon className={`w-8 h-8 ${card.color}`} />
+      <div className="container py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          
+          <div className="lg:col-span-2 space-y-8">
+            
+            <Card className="glass-card p-8">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-lg bg-accent/10 flex items-center justify-center font-bold text-accent text-xl">
+                    {job.company.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <h1 className="text-3xl font-bold mb-2">{job.title}</h1>
+                    <p className="text-lg text-muted-foreground mb-4">{job.company}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge>{job.employmentType}</Badge>
+                      <Badge variant="secondary">{job.location}</Badge>
+                      <Badge variant="outline">{job.experience}</Badge>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mb-1">{card.title}</p>
-                <p className="text-3xl font-bold">{card.value}</p>
-              </Card>
-            );
-          })}
-        </div>
-
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          
-          <Card className="glass-card p-6">
-            <h3 className="font-bold mb-4">Applications Per Month</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={applicationsPerMonth}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="month" stroke="var(--muted-foreground)" />
-                <YAxis stroke="var(--muted-foreground)" />
-                <Tooltip />
-                <Line type="monotone" dataKey="applications" stroke="var(--accent)" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
-
-          
-          <Card className="glass-card p-6">
-            <h3 className="font-bold mb-4">Application Status Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={3}
-                  dataKey="value"
-                  nameKey="name"
+                <button
+                  onClick={() => setSaved(!saved)}
+                  className="text-muted-foreground hover:text-accent transition-colors"
                 >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {saved ? (
+                    <BookmarkCheck className="w-6 h-6 text-accent" />
+                  ) : (
+                    <Bookmark className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-4 gap-4 pt-6 border-t border-border">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Salary</p>
+                  <p className="font-semibold">{job.salary}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Location</p>
+                  <p className="font-semibold">{job.location}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Posted</p>
+                  <p className="font-semibold">{job.createdAt}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Applicants</p>
+                  <p className="font-semibold">{job.applicants}</p>
+                </div>
+              </div>
+            </Card>
+
+            
+            <Card className="glass-card p-8">
+              <h2 className="text-2xl font-bold mb-4">Job Description</h2>
+              <p className="text-muted-foreground mb-6">{job.description}</p>
+
+
+
+              
+
+              
+            </Card>
+
+            
+            <Card className="glass-card p-8">
+              <h2 className="text-2xl font-bold mb-4">Required Skills</h2>
+              <div className="flex flex-wrap gap-2">
+                {job.skills.map((skill) => (
+                <Badge key={skill} variant="outline" className="px-4 py-2">
+                 {skill}
+                </Badge>
                   ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
+              </div>
+            </Card>
 
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          
-          <Card className="glass-card p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold">Recent Applications</h3>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/user/applications")}>
-                View All
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {recentApplications.length > 0 ? (
-                recentApplications.map((app) => (
-                  <div key={app.id} className="flex items-start justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-colors">
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{app.jobTitle}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {app.company} • {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : "Recently"}
-                      </p>
+            
+            
+
+            
+            <Card className="glass-card p-8">
+              <h2 className="text-2xl font-bold mb-6">Related Opportunities</h2>
+              <div className="space-y-4">
+                {RELATED_JOBS.map((job) => (
+                  <div key={job.id} className="flex items-center justify-between p-4 rounded-lg bg-background/50 hover:bg-background transition-colors cursor-pointer">
+                    <div>
+                      <p className="font-medium">{job.title}</p>
+                      <p className="text-sm text-muted-foreground">{job.company}</p>
                     </div>
-                    <Badge variant={app.status === "Shortlisted" ? "default" : "secondary"}>
-                      {app.status}
-                    </Badge>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground p-3">No applications submitted yet.</p>
-              )}
-            </div>
-          </Card>
-
-          
-          <Card className="glass-card p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold">Recommended For You</h3>
-              <TrendingUp className="w-4 h-4 text-accent" />
-            </div>
-            <div className="space-y-3">
-              {recommendedJobs.length > 0 ? (
-                recommendedJobs.map((job) => (
-                  <div 
-                    key={job.id} 
-                    onClick={() => navigate(`/user/apply/${job.id}`)}
-                    className="flex items-start justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-colors cursor-pointer"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{job.title}</p>
-                      <p className="text-xs text-muted-foreground">{job.company}</p>
-                      <p className="text-xs text-accent font-medium mt-1">{job.salary}</p>
+                    <div className="text-right">
+                      <p className="font-semibold text-accent">{job.salary}</p>
                     </div>
-                    <Badge variant="outline" className="text-accent border-accent">
-                      Active
-                    </Badge>
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground p-3">No recommended jobs available.</p>
-              )}
-            </div>
-          </Card>
-        </div>
-
-        
-        <Card className="glass-card p-6">
-          <h3 className="font-bold mb-4">Quick Actions</h3>
-          <div className="grid md:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-12" onClick={() => navigate("/user/browse-jobs")}>
-              Browse Jobs
-            </Button>
-            <Button variant="outline" className="h-12" onClick={() => navigate("/user/profile")}>
-              Update Resume
-            </Button>
-            <Button variant="outline" className="h-12" onClick={() => navigate("/user/profile")}>
-              Edit Profile
-            </Button>
+                ))}
+              </div>
+            </Card>
           </div>
-        </Card>
+
+          
+          <div className="lg:col-span-1">
+            <Card className="glass-card p-6 space-y-4 sticky top-24">
+              <Button className="w-full btn-premium"onClick={() => navigate(`/user/apply/${job.id}`)}
+>               Apply Now
+              </Button>
+
+              <Button variant="outline" className="w-full">
+                <Share2 className="w-4 h-4 mr-2" />
+                Share Job
+              </Button>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Application Deadline</p>
+                  <p className="font-semibold">{job.deadline}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Job Type</p>
+                  <p className="font-semibold">{job.employmentType}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Experience Level</p>
+                  <p className="font-semibold">{job.experience}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Work Mode</p>
+                  <p className="font-semibold">{job.location}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="bg-accent/10 rounded-lg p-4">
+                <p className="text-sm text-muted-foreground mb-2">Match Score</p>
+                <p className="text-2xl font-bold text-accent">92%</p>
+                <p className="text-xs text-muted-foreground mt-2">Based on your profile and skills</p>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
