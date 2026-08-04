@@ -17,12 +17,28 @@ export default function AdminDashboard() {
   const [companies, setCompanies] = useState<any[]>([]);
 
   useEffect(() => {
-    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    // 1. Fetch registered users live from your FastAPI database backend
+    fetch("http://localhost:8000/users/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.users)) {
+          const formattedUsers = data.users.map((u: any) => ({
+            id: u.id,
+            fullName: u.name,
+            email: u.email,
+            role: u.role || "user",
+            createdAt: u.createdAt || new Date().toISOString()
+          }));
+          setUsers(formattedUsers);
+        }
+      })
+      .catch((err) => console.error("Error fetching users from database:", err));
+
+    // 2. Load other data from localStorage as before
     const storedJobs = JSON.parse(localStorage.getItem("jobs") || "[]");
     const storedApps = JSON.parse(localStorage.getItem("applications") || "[]");
     const storedCompanies = JSON.parse(localStorage.getItem("companyProfiles") || "[]");
 
-    setUsers(storedUsers);
     setJobs(storedJobs);
     setApplications(storedApps);
     setCompanies(storedCompanies);
@@ -172,7 +188,7 @@ export default function AdminDashboard() {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground py-4 text-center">No users found in localStorage.</p>
+                <p className="text-sm text-muted-foreground py-4 text-center">No users found in database.</p>
               )}
             </div>
           </Card>
