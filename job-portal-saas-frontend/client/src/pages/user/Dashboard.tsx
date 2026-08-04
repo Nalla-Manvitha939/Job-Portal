@@ -1,342 +1,315 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationNext, 
-  PaginationPrevious 
-} from "@/components/ui/pagination";
-import { Search, MapPin, Briefcase, DollarSign, Bookmark, BookmarkCheck, ArrowLeft } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Briefcase, BookmarkCheck, Calendar, CheckCircle, ArrowRight, TrendingUp } from "lucide-react";
 import { useLocation } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
-interface Job {
-  id: number;
-  title: string;
-  company: string;
-  location: string;
-  salary: string;
-  experience: string;
-  employmentType: string;
-  category: string;
-  deadline: string;
-  description: string;
-  skills: string[];
-  recruiterId: number;
-  recruiterName: string;
-  recruiterEmail: string;
-  status: string;
-  applicants: number;
-  createdAt: string;
-}
-
-const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Freelance"];
-const WORK_MODES = ["Remote", "On-site", "Hybrid"];
-
-export default function BrowseJobs() {
+export default function UserDashboard() {
   const [, navigate] = useLocation();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState({
-    type: "",
-    mode: "",
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  
-  const [savedJobs, setSavedJobs] = useState<any[]>([]);
+
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [applications, setApplications] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [savedJobs, setSavedJobs] = useState<any[]>([]);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    const allJobs = JSON.parse(localStorage.getItem("jobs") || "[]");
-    const activeJobs = allJobs.filter((job: Job) => job.status === "Active");
-    setJobs(activeJobs);
-
     const user = JSON.parse(localStorage.getItem("currentUser") || "null");
-    setCurrentUser(user);
+    const rawApps = JSON.parse(localStorage.getItem("applications") || "[]");
+    const rawJobs = JSON.parse(localStorage.getItem("jobs") || "[]");
+    const rawSaved = JSON.parse(localStorage.getItem("savedJobs") || "[]");
 
-    const storedSavedJobs = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-    setSavedJobs(storedSavedJobs);
+    setCurrentUser(user);
+    setApplications(rawApps);
+    setJobs(rawJobs);
+    setSavedJobs(rawSaved);
+
+    const profiles = JSON.parse(localStorage.getItem("profiles") || "[]");
+    const myProfile = profiles.find(
+      (p: any) => String(p.userId) === String(user?.id)
+    );
+    setProfile(myProfile || null);
   }, []);
 
-  const filteredJobs = jobs.filter((job) => {
-    if (searchQuery && !job.title.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-
-    if (filters.type && job.employmentType !== filters.type) {
-      return false;
-    }
-
-    if (filters.mode && job.location.toLowerCase() !== filters.mode.toLowerCase()) {
-      return false;
-    }
-
-    return true;
-  });
-
-  const itemsPerPage = 6;
-  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
-  const paginatedJobs = filteredJobs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  const toggleSaveJob = (job: Job) => {
-    if (!currentUser) return;
-
-    const exists = savedJobs.find(
-      (item: any) => item.jobId === job.id && item.userId === currentUser.id
+  const myApplications = useMemo(() => {
+    if (!currentUser) return [];
+    return applications.filter(
+      (app: any) => String(app.applicantId) === String(currentUser.id)
     );
+  }, [applications, currentUser]);
 
-    let updatedSavedJobs;
+  const userSavedJobsCount = useMemo(() => {
+    if (!currentUser) return 0;
+    return savedJobs.filter(
+      (item: any) => String(item.userId) === String(currentUser.id)
+    ).length;
+  }, [savedJobs, currentUser]);
 
-    if (exists) {
-      updatedSavedJobs = savedJobs.filter(
-        (item: any) => !(item.jobId === job.id && item.userId === currentUser.id)
-      );
-    } else {
-      updatedSavedJobs = [
-        ...savedJobs,
-        {
-          id: Date.now(),
-          jobId: job.id,
-          userId: currentUser.id,
-          savedAt: new Date().toISOString(),
-        },
-      ];
-    }
+  const profileCompletion = useMemo(() => {
+    if (!profile) return 0;
 
-    localStorage.setItem("savedJobs", JSON.stringify(updatedSavedJobs));
-    setSavedJobs(updatedSavedJobs);
-  };
+    let completed = 0;
+    const total = 11;
+
+    if (profile.firstName) completed++;
+    if (profile.lastName) completed++;
+    if (profile.email) completed++;
+    if (profile.phone) completed++;
+    if (profile.location) completed++;
+    if (profile.headline) completed++;
+    if (profile.bio) completed++;
+    if (profile.skills?.length) completed++;
+    if (profile.experience?.length) completed++;
+    if (profile.education?.length) completed++;
+    if (profile.resumeName) completed++;
+
+    return Math.round((completed / total) * 100);
+  }, [profile]);
+
+  const statusData = useMemo(() => {
+    return [
+      {
+        name: "Pending",
+        value: myApplications.filter((a: any) => a.status === "Pending").length,
+        color: "#3b82f6",
+      },
+      {
+        name: "Reviewed",
+        value: myApplications.filter((a: any) => a.status === "Reviewed").length,
+        color: "#8b5cf6",
+      },
+      {
+        name: "Shortlisted",
+        value: myApplications.filter((a: any) => a.status === "Shortlisted").length,
+        color: "#10b981",
+      },
+      {
+        name: "Rejected",
+        value: myApplications.filter((a: any) => a.status === "Rejected").length,
+        color: "#ef4444",
+      },
+      {
+        name: "Hired",
+        value: myApplications.filter((a: any) => a.status === "Hired").length,
+        color: "#f59e0b",
+      },
+    ];
+  }, [myApplications]);
+
+  const applicationsPerMonth = useMemo(() => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthMap: Record<string, number> = {};
+
+    myApplications.forEach((app: any) => {
+      if (app.appliedAt) {
+        const month = months[new Date(app.appliedAt).getMonth()];
+        monthMap[month] = (monthMap[month] || 0) + 1;
+      }
+    });
+
+    return months.map((m) => ({
+      month: m,
+      applications: monthMap[m] || 0,
+    }));
+  }, [myApplications]);
+
+  const recentApplications = useMemo(() => {
+    return [...myApplications]
+      .sort((a: any, b: any) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())
+      .slice(0, 5);
+  }, [myApplications]);
+
+  const recommendedJobs = useMemo(() => {
+    return jobs
+      .filter((j: any) => j.status === "Active")
+      .slice(0, 5);
+  }, [jobs]);
+
+  const DASHBOARD_CARDS = useMemo(() => {
+    const shortlistedCount = myApplications.filter((a: any) => a.status === "Shortlisted").length;
+    return [
+      {
+        title: "Total Applications",
+        value: myApplications.length,
+        icon: Briefcase,
+        color: "text-blue-600",
+      },
+      {
+        title: "Saved Jobs",
+        value: userSavedJobsCount, 
+        icon: BookmarkCheck,
+        color: "text-purple-600",
+      },
+      {
+        title: "Interview Calls",
+        value: shortlistedCount,
+        icon: Calendar,
+        color: "text-green-600",
+      },
+      {
+        title: "Profile Completion",
+        value: `${profileCompletion}%`,
+        icon: CheckCircle,
+        color: "text-orange-600",
+      },
+    ];
+  }, [myApplications, userSavedJobsCount, profileCompletion]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Top Header & Navigation */}
-      <div className="sticky top-0 z-40 border-b border-blue-200 bg-white/95 backdrop-blur shadow-sm">
-        <div className="container py-5">
-          <button
-            onClick={() => navigate("/user/dashboard")}
-            className="mb-4 flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </button>
-
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur">
+        <div className="container py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-blue-700">Browse Jobs</h1>
-            <p className="mt-1 text-gray-500">Showing {filteredJobs.length} opportunities</p>
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">Welcome back! Here's your job search summary</p>
           </div>
+          <Button onClick={() => navigate("/user/browse-jobs")}>
+            Browse Jobs <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="container py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-             <Card className="sticky top-24 rounded-2xl border border-blue-200 bg-white p-6 shadow-md space-y-6">
-              <div>
-                <h3 className="mb-4 text-lg font-bold text-blue-700">Filters</h3>
-              </div>
-
-              {/* Search Filter */}
-              <div className="space-y-2">
-                <Label>Search</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Job title..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="pl-10 border-blue-200 focus:border-blue-600 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Job Type Filter */}
-              <div className="space-y-3">
-                <Label>Job Type</Label>
-                {JOB_TYPES.map((type) => (
-                  <label key={type} className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={filters.type === type}
-                      onCheckedChange={(checked) => {
-                        setFilters((prev) => ({ ...prev, type: checked ? type : "" }));
-                        setCurrentPage(1);
-                      }}
-                    />
-                    <span className="text-sm">{type}</span>
-                  </label>
-                ))}
-              </div>
-
-              {/* Work Mode Filter */}
-              <div className="space-y-3">
-                <Label>Work Mode</Label>
-                {WORK_MODES.map((mode) => (
-                  <label key={mode} className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={filters.mode === mode}
-                      onCheckedChange={(checked) => {
-                        setFilters((prev) => ({ ...prev, mode: checked ? mode : "" }));
-                        setCurrentPage(1);
-                      }}
-                    />
-                    <span className="text-sm">{mode}</span>
-                  </label>
-                ))}
-              </div>
-
-              {/* Clear Filters Button */}
-              <Button
-                variant="outline"
-                className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+      <div className="container py-8 space-y-8">
+        {/* Metric Cards */}
+        <div className="grid md:grid-cols-4 gap-6">
+          {DASHBOARD_CARDS.map((card, i) => {
+            const Icon = card.icon;
+            return (
+              <Card 
+                key={i} 
+                className="glass-card p-6 cursor-pointer hover:border-blue-500 transition-all"
                 onClick={() => {
-                  setFilters({ type: "", mode: "" });
-                  setSearchQuery("");
-                  setCurrentPage(1);
+                  if (card.title === "Saved Jobs") {
+                    navigate("/user/saved-jobs");
+                  }
                 }}
               >
-                Clear Filters
+                <div className="flex items-start justify-between mb-4">
+                  <Icon className={`w-8 h-8 ${card.color}`} />
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">{card.title}</p>
+                <p className="text-3xl font-bold">{card.value}</p>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="glass-card p-6">
+            <h3 className="font-bold mb-4">Applications Per Month</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={applicationsPerMonth}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="month" stroke="var(--muted-foreground)" />
+                <YAxis stroke="var(--muted-foreground)" />
+                <Tooltip />
+                <Line type="monotone" dataKey="applications" stroke="var(--accent)" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card className="glass-card p-6">
+            <h3 className="font-bold mb-4">Application Status Distribution</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={3}
+                  dataKey="value"
+                  nameKey="name"
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
+
+        {/* Lists Section */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="glass-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold">Recent Applications</h3>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/user/applications")}>
+                View All
               </Button>
-            </Card>
-          </div>
-
-          {/* Job Listings Grid */}
-          <div className="lg:col-span-3 space-y-6">
-            <div className="space-y-4">
-              {paginatedJobs.length > 0 ? (
-                paginatedJobs.map((job) => (
-                  <Card key={job.id} className="rounded-2xl border border-blue-200 bg-white p-6 shadow-md hover:shadow-xl hover:border-blue-400 transition-all duration-300 group">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center font-bold text-blue-700">
-                          {job.company.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1">
-                          <h3 
-                            className="text-lg font-bold text-gray-900 group-hover:text-blue-700 transition-colors cursor-pointer"
-                            onClick={() => navigate(`/user/job/${job.id}`)}
-                          >
-                            {job.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">{job.company}</p>
-                        </div>
-                      </div>
-                      
-                      {/* Bookmark Save Button */}
-                      <button
-                        onClick={() => toggleSaveJob(job)}
-                        className="text-gray-500 hover:text-blue-600 transition-colors"
-                      >
-                        {savedJobs.some(
-                          (item: any) =>
-                            item.jobId === job.id &&
-                            item.userId === currentUser?.id
-                        ) ? (
-                          <BookmarkCheck className="w-5 h-5 text-blue-600" />
-                        ) : (
-                          <Bookmark className="w-5 h-5" />
-                        )}
-                      </button>
+            </div>
+            <div className="space-y-3">
+              {recentApplications.length > 0 ? (
+                recentApplications.map((app) => (
+                  <div key={app.id} className="flex items-start justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-colors">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{app.jobTitle}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {app.company} • {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : "Recently"}
+                      </p>
                     </div>
-
-                    <div className="grid md:grid-cols-2 gap-4 mb-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <DollarSign className="w-4 h-4" />
-                        {job.salary}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Briefcase className="w-4 h-4" />
-                        {job.experience}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Badge variant="secondary">{job.employmentType}</Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        {job.location}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {job.skills.map((skill) => (
-                        <Badge
-                          key={skill} 
-                          className="bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200"
-                        >
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    <div className="flex gap-3">
-                      <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg" onClick={() => navigate(`/user/job/${job.id}`)}>
-                        View Details
-                      </Button>
-                      <Button variant="outline" className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg" onClick={() => navigate(`/user/apply/${job.id}`)}>
-                        Apply Now
-                      </Button>
-                    </div>
-                  </Card>
+                    <Badge variant={app.status === "Shortlisted" ? "default" : "secondary"}>
+                      {app.status}
+                    </Badge>
+                  </div>
                 ))
               ) : (
-                <Card className="p-12 text-center border border-blue-200 bg-white">
-                  <p className="text-muted-foreground">No jobs found matching your criteria.</p>
-                </Card>
+                <p className="text-sm text-muted-foreground p-3">No applications submitted yet.</p>
               )}
             </div>
+          </Card>
 
-            {/* Pagination Component */}
-            {totalPages > 1 && (
-              <div className="flex justify-center">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        className={`border border-blue-200 text-blue-600 hover:bg-blue-100 ${
-                          currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
-                        }`}
-                      />
-                    </PaginationItem>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => setCurrentPage(page)}
-                          isActive={currentPage === page}
-                          className={`cursor-pointer ${
-                            currentPage === page
-                              ? "bg-blue-600 text-white border-blue-600"
-                              : "text-blue-600 border-blue-200 hover:bg-blue-100"
-                          }`}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        className={`border border-blue-200 text-blue-600 hover:bg-blue-100 ${
-                          currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
-                        }`}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
-          </div>
+          <Card className="glass-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold">Recommended For You</h3>
+              <TrendingUp className="w-4 h-4 text-accent" />
+            </div>
+            <div className="space-y-3">
+              {recommendedJobs.length > 0 ? (
+                recommendedJobs.map((job) => (
+                  <div 
+                    key={job.id} 
+                    onClick={() => navigate(`/user/apply/${job.id}`)}
+                    className="flex items-start justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-colors cursor-pointer"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{job.title}</p>
+                      <p className="text-xs text-muted-foreground">{job.company}</p>
+                      <p className="text-xs text-accent font-medium mt-1">{job.salary}</p>
+                    </div>
+                    <Badge variant="outline" className="text-accent border-accent">
+                      Active
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground p-3">No recommended jobs available.</p>
+              )}
+            </div>
+          </Card>
         </div>
+
+        {/* Quick Actions */}
+        <Card className="glass-card p-6">
+          <h3 className="font-bold mb-4">Quick Actions</h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Button variant="outline" className="h-12" onClick={() => navigate("/user/browse-jobs")}>
+              Browse Jobs
+            </Button>
+            <Button variant="outline" className="h-12" onClick={() => navigate("/user/profile")}>
+              Update Resume
+            </Button>
+            <Button variant="outline" className="h-12" onClick={() => navigate("/user/profile")}>
+              Edit Profile
+            </Button>
+          </div>
+        </Card>
       </div>
     </div>
   );
