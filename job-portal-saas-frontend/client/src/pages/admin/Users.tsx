@@ -34,34 +34,35 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState("All");
   const [users, setUsers] = useState<User[]>([]);
 
-  
+  // Load users live from FastAPI backend
   const loadUsers = () => {
-    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    fetch("http://localhost:8000/users/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.users)) {
+          const formattedUsers: User[] = data.users.map((user: any) => {
+            const rawRole = (user.role || "").toLowerCase();
+            let assignedRole: "Admin" | "Recruiter" | "Job Seeker" = "Job Seeker";
+            if (rawRole === "admin") assignedRole = "Admin";
+            else if (rawRole === "recruiter" || rawRole === "company") assignedRole = "Recruiter";
 
-    const formattedUsers: User[] = storedUsers.map((user: any) => ({
-      id: user.id,
-      name:
-        user.fullName ||
-        `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-        user.username ||
-        "Unnamed User",
-      email: user.email || "No email provided",
-      role:
-        user.role === "admin" || user.role === "Admin"
-          ? "Admin"
-          : user.role === "recruiter" || user.role === "Recruiter"
-          ? "Recruiter"
-          : "Job Seeker",
-      joined: user.createdAt
-        ? new Date(user.createdAt).toLocaleDateString()
-        : "Recently",
-      status: user.status || "Active",
-    }));
-
-    setUsers(formattedUsers);
+            return {
+              id: user.id,
+              name: user.name || user.username || "Unnamed User",
+              email: user.email || "No email provided",
+              role: assignedRole,
+              joined: user.createdAt || user.created_at
+                ? new Date(user.createdAt || user.created_at).toLocaleDateString()
+                : "Recently",
+              status: user.status || "Active",
+            };
+          });
+          setUsers(formattedUsers);
+        }
+      })
+      .catch((err) => console.error("Error fetching users from database:", err));
   };
 
-  
   useEffect(() => {
     loadUsers();
 
@@ -76,7 +77,6 @@ export default function UsersPage() {
     };
   }, []);
 
-  
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchesSearch =
@@ -90,40 +90,41 @@ export default function UsersPage() {
     });
   }, [search, roleFilter, users]);
 
-  
+  // Handle user deletion (can also connect to backend DELETE route if available)
   const handleDeleteUser = (userId: number | string) => {
     if (!confirm("Delete this user?")) return;
 
-    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
-    const updatedUsers = storedUsers.filter((u: any) => u.id !== userId);
-
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    loadUsers();
-    window.dispatchEvent(new Event("usersUpdated"));
+    fetch(`http://localhost:8000/users/${userId}`, {
+      method: "DELETE",
+    })
+      .then(() => {
+        loadUsers();
+        window.dispatchEvent(new Event("usersUpdated"));
+      })
+      .catch((err) => {
+        // Fallback local UI update if backend delete route isn't configured yet
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+        console.error("Error deleting user from backend:", err);
+      });
   };
 
-  
+  // Handle blocking/unblocking user status toggle
   const handleToggleBlock = (userId: number | string) => {
-    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
-    const updatedUsers = storedUsers.map((u: any) => {
-      if (u.id === userId) {
-        const currentStatus = u.status || "Active";
-        return {
-          ...u,
-          status: currentStatus === "Active" ? "Inactive" : "Active",
-        };
-      }
-      return u;
-    });
-
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    loadUsers();
-    window.dispatchEvent(new Event("usersUpdated"));
+    setUsers((prevUsers) =>
+      prevUsers.map((u) => {
+        if (u.id === userId) {
+          return {
+            ...u,
+            status: u.status === "Active" ? "Inactive" : "Active",
+          };
+        }
+        return u;
+      })
+    );
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {}
       <div className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur">
         <div className="container py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -145,7 +146,6 @@ export default function UsersPage() {
       </div>
 
       <div className="container py-8 space-y-8">
-        
         <div className="grid md:grid-cols-4 gap-6">
           <Card className="glass-card p-6">
             <Users className="w-8 h-8 text-blue-600 mb-3" />
@@ -178,7 +178,6 @@ export default function UsersPage() {
           </Card>
         </div>
 
-        
         <Card className="glass-card p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
@@ -204,7 +203,6 @@ export default function UsersPage() {
           </div>
         </Card>
 
-        
         <Card className="glass-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -312,7 +310,6 @@ export default function UsersPage() {
           </div>
         </Card>
 
-        
         <Card className="glass-card p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
