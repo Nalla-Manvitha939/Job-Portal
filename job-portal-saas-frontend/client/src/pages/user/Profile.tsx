@@ -154,20 +154,20 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50">
       {}
-      <div className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur">
+      <div className="sticky top-0 z-40 border-b border-blue-200 bg-white/95 backdrop-blur shadow-sm">
         <div className="container py-4">
           <button
             onClick={() => navigate("/user/dashboard")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">My Profile</h1>
+              <h1 className="text-3xl font-bold text-blue-700">My Profile</h1>
               <p className="text-sm text-muted-foreground">Manage your profile and professional information</p>
             </div>
             <Button
@@ -184,7 +184,7 @@ export default function Profile() {
       <div className="container py-8">
         <div className="max-w-4xl mx-auto space-y-8">
           
-          <Card className="glass-card p-8">
+          <Card className="rounded-2xl border border-blue-200 bg-white p-6 shadow-md">
             <div className="flex items-start gap-6 mb-6">
               
               
@@ -249,6 +249,7 @@ export default function Profile() {
                           name="firstName"
                           value={profileData.firstName}
                           onChange={handleChange}
+                          className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                         />
                       </div>
                       <div>
@@ -258,6 +259,7 @@ export default function Profile() {
                           name="lastName"
                           value={profileData.lastName}
                           onChange={handleChange}
+                          className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                         />
                       </div>
                     </div>
@@ -269,6 +271,7 @@ export default function Profile() {
                         value={profileData.headline}
                         onChange={handleChange}
                         placeholder="e.g., Senior React Developer"
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                       />
                     </div>
                     <div>
@@ -279,6 +282,8 @@ export default function Profile() {
                         value={profileData.bio}
                         onChange={handleChange}
                         rows={3}
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
+                        
                       />
                     </div>
                   </div>
@@ -303,6 +308,7 @@ export default function Profile() {
                     type="email"
                     value={profileData.email}
                     onChange={handleChange}
+                    className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -312,6 +318,7 @@ export default function Profile() {
                     name="phone"
                     value={profileData.phone}
                     onChange={handleChange}
+                    className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -321,6 +328,7 @@ export default function Profile() {
                     name="location"
                     value={profileData.location}
                     onChange={handleChange}
+                    className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -343,7 +351,7 @@ export default function Profile() {
 
             {isEditing && (
               <div className="flex gap-3 pt-6 border-t border-border">
-                <Button className="flex-1 btn-premium" onClick={handleSave}>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
                   Save Changes
                 </Button>
                 <Button
@@ -387,6 +395,7 @@ export default function Profile() {
                       placeholder="Enter skill"
                       value={newSkill}
                       onChange={(e) => setNewSkill(e.target.value)}
+                      className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                     />
 
                     <Button
@@ -460,6 +469,7 @@ export default function Profile() {
                             title: e.target.value,
                           })
                         }
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                       />
 
                       <Input
@@ -471,6 +481,7 @@ export default function Profile() {
                             company: e.target.value,
                           })
                         }
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                       />
 
                       <Input
@@ -482,6 +493,7 @@ export default function Profile() {
                             duration: e.target.value,
                           })
                         }
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                       />
 
                       <Textarea
@@ -493,6 +505,7 @@ export default function Profile() {
                             description: e.target.value,
                           })
                         }
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                       />
 
                       <Button
@@ -574,6 +587,7 @@ export default function Profile() {
                             school: e.target.value,
                           })
                         }
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                       />
 
                       <Input
@@ -585,6 +599,7 @@ export default function Profile() {
                             degree: e.target.value,
                           })
                         }
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                       />
 
                       <Input
@@ -596,7 +611,9 @@ export default function Profile() {
                             year: e.target.value,
                           })
                         }
+                        className="border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                       />
+                      
 
                       <Button
                         onClick={() => {
@@ -678,7 +695,7 @@ export default function Profile() {
                     id="resume-upload"
                     type="file"
                     accept=".pdf,.doc,.docx"
-                    className="hidden"
+                    className="hidden border-blue-200 focus:border-blue-600 focus:ring-blue-500"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
@@ -697,10 +714,13 @@ export default function Profile() {
                     }}
                   />
 
-                  <Button asChild>
-                    <label htmlFor="resume-upload" className="cursor-pointer">
-                      Choose Resume
-                    </label>
+                  <Button 
+                    asChild
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                     <label htmlFor="resume-upload" className="cursor-pointer flex items-center gap-2">
+                       <Upload className="w-4 h-4" />
+                       Choose Resume
+                     </label>
                   </Button>
                 </>
               )}
