@@ -19,7 +19,6 @@ class RegisterSchema(BaseModel):
 def register_user(data: RegisterSchema):
     db = SessionLocal()
     try:
-        
         existing_user = db.query(User).filter(User.email == data.email).first()
         if existing_user:
             raise HTTPException(
@@ -27,7 +26,6 @@ def register_user(data: RegisterSchema):
                 detail="User with this email already exists"
             )
 
-        
         new_user = User(
             username=data.name,
             email=data.email,
@@ -48,5 +46,31 @@ def register_user(data: RegisterSchema):
                 "role": new_user.role
             }
         }
+    finally:
+        db.close()
+
+
+@router.get("/")
+def get_all_users():
+    db = SessionLocal()
+    try:
+        users = db.query(User).all()
+        user_list = [
+            {
+                "id": user.id,
+                "name": getattr(user, "username", None),
+                "email": user.email,
+                "mobile": getattr(user, "mobile", None),
+                "role": getattr(user, "role", "user"),
+                "createdAt": getattr(user, "created_at", None) or getattr(user, "createdAt", None)
+            }
+            for user in users
+        ]
+        return {
+            "success": True,
+            "users": user_list
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
